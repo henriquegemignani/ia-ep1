@@ -9,6 +9,21 @@ if(NOT ${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
     file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/.gitignore "*")
 endif()
 
+if (UNIX OR MINGW)
+    add_definitions(
+        -std=c++11 # Introduced in gcc-4.7, this option was called -std=c++0x before.
+        
+        -U_FORTIFY_SOURCE # buffer overflow checks
+    
+        # More information for the flags, check http://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
+        -Wall
+        -Wextra
+        
+        -Winit-self
+        -Wzero-as-null-pointer-constant
+    )
+endif()
+
 add_executable(ia-ep1 
     src/agent.h src/agent.cc 
     src/environment.h src/environment.cc

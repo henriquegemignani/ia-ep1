@@ -6,10 +6,10 @@
 
 class input_error : public std::exception {
   public:
-    input_error(const std::string& message) noexcept
+    input_error(const std::string& message) 
         : message_(message) {}
         
-    virtual const char* what() const noexcept {
+    virtual const char* what() const  {
         return message_.c_str();
     }
     

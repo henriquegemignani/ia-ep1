@@ -1,3 +1,4 @@
 #include "agent.h"
 
-void Agent::Think() {}
+Agent::Agent(SearchStrategyType type) {
+}

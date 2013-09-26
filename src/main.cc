@@ -64,7 +64,7 @@ void openFile(const std::string& filename, MapMatrix& matrix) {
             matrix_line[i] = ConvertToMatrixItem(line[i]);
     }
     
-    assert(matrix.size() == size);
+    assert(matrix.size() == static_cast<MapMatrix::size_type>(size));
     
 }
 
@@ -78,7 +78,7 @@ try {
     openFile(argv[1], env.matrix());
     SearchStrategyType type = ConvertToStrategy(argv[2]);
 
-    env.AddAgent(std::unique_ptr<Agent>(new Agent(type)));
+    env.set_agent(std::unique_ptr<Agent>(new Agent(type)));
     return 0;
     
 } catch(const input_error& err) {

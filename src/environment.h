@@ -19,14 +19,14 @@ class Environment {
     Environment();
     ~Environment();
 
-    void AddAgent(std::unique_ptr<Agent>&& agent);
+    void set_agent(std::unique_ptr<Agent>&& agent);
 
     const MapMatrix& matrix() const { return matrix_; }
           MapMatrix& matrix()       { return matrix_; }
     
   private:
     MapMatrix matrix_;
-    std::vector<std::unique_ptr<Agent>> agents_;
+    std::unique_ptr<Agent> agent_;
     
 };
 

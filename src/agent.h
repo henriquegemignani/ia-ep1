@@ -1,6 +1,8 @@
 #ifndef GOLDMINE_AGENT_H_
 #define GOLDMINE_AGENT_H_
 
+#include "forward_declarations.h"
+
 enum class SearchStrategyType {
     INVALID,
     BREADTH_FIRST,
@@ -12,8 +14,10 @@ class Agent {
   public:
     Agent(SearchStrategyType type);
     
-  private:
+    Action CalculateNextAction(const Perception& perception);
     
+  private:
+    SearchStrategyType type_;
 };
 
 #endif // GOLDMINE_AGENT_H_

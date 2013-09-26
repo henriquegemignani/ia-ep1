@@ -27,5 +27,5 @@ endif()
 add_executable(ia-ep1 
     src/agent.h src/agent.cc 
     src/environment.h src/environment.cc
-    src/errors.h
+    src/errors.h src/forward_declarations.h src/actions.h
     src/main.cc)

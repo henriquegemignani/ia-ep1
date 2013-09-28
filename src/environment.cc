@@ -6,22 +6,11 @@
 #include <cassert>
     
 int Perception::CalculateScore(const State& state) const {
-    int score = 0;
-    for (Action a : state.CreateActionList()) {
-        switch (a) {
-            case Action::MOVE_DOWN:
-            case Action::MOVE_UP:
-            case Action::MOVE_RIGHT:
-            case Action::MOVE_LEFT:
-                score += -1;
-                break;
-            case Action::PICK_GOLD:
-                score += 4 * matrix_.size();
-                break;
-            default:
-                break;
-        }
-    }
+    assert(state.size_ == state.CreateActionList().size());
+
+    int num_steps = state.size_ - state.picked_gold_.size();
+
+    int score = state.picked_gold_.size() * 4 * matrix_.size() - num_steps;
     return score;
 }
 
@@ -75,6 +64,7 @@ std::shared_ptr<const State> State::ExecuteAction(Action a) const {
         default: assert(false);
     }
     result->next_action_ = a;
+    ++result->size_;
     return result;
 }
     

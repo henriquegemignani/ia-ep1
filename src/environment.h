@@ -40,7 +40,7 @@ struct Perception {
 };
 
 struct State : public std::enable_shared_from_this<State> {
-    State() : next_action_(Action::DONE) {}
+    State() : next_action_(Action::DONE), size_(0) {}
     State(const State&) = default;
     State& operator=(const State&) = default;
     State(State&& r)
@@ -52,6 +52,7 @@ struct State : public std::enable_shared_from_this<State> {
 
     std::shared_ptr<const State> previous_;
     Action next_action_;
+    int size_;
     std::set<Position> picked_gold_;
     Position agent_position_;
 

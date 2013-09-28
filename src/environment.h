@@ -43,7 +43,7 @@ struct State : public std::enable_shared_from_this<State> {
     State() : next_action_(Action::DONE), size_(0) {}
     State(const State&) = default;
     State& operator=(const State&) = default;
-    State(State&& r)
+    State(State&& r) throw()
         : previous_(std::move(r.previous_))
         , next_action_(r.next_action_)
         , picked_gold_(std::move(r.picked_gold_))

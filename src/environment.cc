@@ -85,7 +85,7 @@ Environment::Environment() : current_state_(new State) {}
 
 Environment::~Environment() {}
 
-std::shared_ptr<const State> Environment::Run() {
+Environment::Results Environment::Run() {
     while (true) {
         Action a = agent_->CalculateNextAction(data_, current_state_);
         if (a == Action::DONE)
@@ -94,7 +94,7 @@ std::shared_ptr<const State> Environment::Run() {
             throw input_error("Agent requested invalid action.");
         current_state_ = current_state_->ExecuteAction(a);
     }
-    return current_state_;
+    return Results(current_state_->CreateActionList(), data_.CalculateScore(*current_state_));
 }
 
 void Environment::set_agent(std::unique_ptr<Agent>&& agent) {

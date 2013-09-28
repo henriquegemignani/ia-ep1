@@ -29,4 +29,5 @@ add_executable(ia-ep1
     src/environment.h src/environment.cc
     src/mapmatrix.h src/mapmatrix.cc
     src/errors.h src/forward_declarations.h src/actions.h
+    src/input.h src/input.cc
     src/main.cc)

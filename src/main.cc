@@ -85,11 +85,13 @@ try {
     SearchStrategyType type = ConvertToStrategy(argv[2]);
 
     Environment env;
-    openFile(argv[1], env.matrix(), env.gold_locations());
+    openFile(argv[1], env.data().matrix_, env.data().gold_locations_);
 
     env.set_agent(std::unique_ptr<Agent>(new Agent(type)));
 
-    env.Run();
+    State result = env.Run();
+
+    printf("%d pontos\n", env.data().CalculateScore(result));
 
     return 0;
     

@@ -29,12 +29,17 @@ inline bool is_in(const std::set<T>& s, const T& v) {
 struct Perception {
     MapMatrix matrix_;
     std::set<Position> gold_locations_;
+    
+    int CalculateScore(const State&) const;
+    bool IsValidAction(Action, const State&) const;
 };
 
 struct State {
     std::vector<Action> actions_;
     std::set<Position> picked_gold_;
     Position agent_position_;
+
+    State ExecuteAction(Action) const;
 };
 
 class Environment {
@@ -42,14 +47,11 @@ class Environment {
     Environment();
     ~Environment();
     
-    void Run();
+    State Run();
 
     void set_agent(std::unique_ptr<Agent>&& agent);
-    bool IsValidAction(Action) const;
-    int CalculateScore() const;
 
-             MapMatrix& matrix()         { return data_.matrix_; }
-    std::set<Position>& gold_locations() { return data_.gold_locations_; }
+    Perception& data() { return data_; }
     
   private:
     // Store the data in the perception object for simplicity.
@@ -58,10 +60,6 @@ class Environment {
     State current_state_;
 
     std::unique_ptr<Agent> agent_;
-    
-
-    void ExecuteAction(Action);
-    
 };
 
 #endif // GOLDMINE_ENVIRONMENT_H_

@@ -40,6 +40,7 @@ class Environment {
 
     void set_agent(std::unique_ptr<Agent>&& agent);
     bool IsValidAction(Action) const;
+    int CalculateScore() const;
 
     const MapMatrix& matrix() const { return matrix_; }
           MapMatrix& matrix()       { return matrix_; }

@@ -45,6 +45,26 @@ bool Environment::IsValidAction(Action a) const {
         return false;
     }
 }
+    
+int Environment::CalculateScore() const {
+    int score = 0;
+    for (Action a : actions_) {
+        switch (a) {
+            case Action::MOVE_DOWN:
+            case Action::MOVE_UP:
+            case Action::MOVE_RIGHT:
+            case Action::MOVE_LEFT:
+                score += -1;
+                break;
+            case Action::PICK_GOLD:
+                score += 4 * static_cast<int>(matrix_.size());
+                break;
+            default:
+                break;
+        }
+    }
+    return score;
+}
 
 void Environment::ExecuteAction(Action a) {
     if (!IsValidAction(a))

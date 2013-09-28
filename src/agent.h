@@ -6,18 +6,14 @@
 #include <queue>
 #include <functional>
 
-enum class SearchStrategyType {
-    INVALID,
-    BREADTH_FIRST,
-    LIMITED_DEPTH_FIRST,
-    A_STAR
-};
+std::queue<Action> BreadthFirstStrategy(const Perception&, const State&);
+std::queue<Action> LimitedDepthFirstStrategy(const Perception&, const State&);
 
 typedef std::function<std::queue<Action> (const Perception&, const State&)> Strategy;
 
 class Agent {
   public:
-    Agent(SearchStrategyType type);
+    Agent(const Strategy& strategy);
     
     Action CalculateNextAction(const Perception& perception, const State& current_state);
     

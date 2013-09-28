@@ -8,18 +8,18 @@
 #include <stdexcept>
 #include <cassert>
 
-SearchStrategyType ConvertToStrategy(const std::string& identifier) {
+Strategy ConvertToStrategy(const std::string& identifier) {
     if(identifier.size() == 1) {
         switch(identifier[0]) {
-        case 'L': return SearchStrategyType::BREADTH_FIRST;
-        case 'P': return SearchStrategyType::LIMITED_DEPTH_FIRST;
-        case 'A': return SearchStrategyType::A_STAR;
-        default: 
-            /* Nothing */;
+            case 'L': return BreadthFirstStrategy;
+            case 'P': return LimitedDepthFirstStrategy;
+            case 'A': throw input_error("Strategy not yet implemented.");
+            default: 
+                /* Nothing */;
         }
     }
     throw input_error("Unknown strategy: '" + identifier + "'");
-    return SearchStrategyType::INVALID;
+    return Strategy();
 }
 
 void openFile(const std::string& filename, MapMatrix& matrix, std::set<Position>& gold_locations) {
@@ -82,12 +82,11 @@ try {
         fprintf(stderr, "Usage: %s <map-file-path> <search-type>\n", argv[0]);
         return EXIT_SUCCESS;
     }
-    SearchStrategyType type = ConvertToStrategy(argv[2]);
 
     Environment env;
     openFile(argv[1], env.data().matrix_, env.data().gold_locations_);
 
-    env.set_agent(std::unique_ptr<Agent>(new Agent(type)));
+    env.set_agent(std::unique_ptr<Agent>(new Agent(ConvertToStrategy(argv[2]))));
 
     State result = env.Run();
 

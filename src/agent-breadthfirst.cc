@@ -53,8 +53,7 @@ std::queue<Action> BreadthFirstStrategy(const Perception& perception, const std:
     q.emplace(std::shared_ptr<const State>(initial_state), std::map<Position, int>());
 
     while (!q.empty()) {
-        QueueItem qi = q.front();
-        q.pop();
+        QueueItem& qi = q.front();
 
         std::shared_ptr<const State>& s = qi.current_state;
         int s_score = perception.CalculateScore(*s);
@@ -79,6 +78,8 @@ std::queue<Action> BreadthFirstStrategy(const Perception& perception, const std:
                     q.emplace(std::move(new_state), qi.scores);
             }
         }
+
+        q.pop();
     }
 
     std::list<Action> best_path = best_solution.first->CreateActionList();

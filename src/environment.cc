@@ -6,10 +6,7 @@
 #include <cassert>
     
 int Perception::CalculateScore(const State& state) const {
-    assert(state.size_ == state.CreateActionList().size());
-
     int num_steps = state.size_ - state.picked_gold_.size();
-
     int score = state.picked_gold_.size() * 4 * matrix_.size() - num_steps;
     return score;
 }

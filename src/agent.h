@@ -2,6 +2,9 @@
 #define GOLDMINE_AGENT_H_
 
 #include "forward_declarations.h"
+#include "actions.h"
+#include <queue>
+#include <functional>
 
 enum class SearchStrategyType {
     INVALID,
@@ -10,6 +13,8 @@ enum class SearchStrategyType {
     A_STAR
 };
 
+typedef std::function<void (const Perception&, std::queue<Action>&)> Strategy;
+
 class Agent {
   public:
     Agent(SearchStrategyType type);
@@ -17,7 +22,8 @@ class Agent {
     Action CalculateNextAction(const Perception& perception);
     
   private:
-    SearchStrategyType type_;
+    Strategy strategy_;
+    std::queue<Action> next_actions_;
 };
 
 #endif // GOLDMINE_AGENT_H_

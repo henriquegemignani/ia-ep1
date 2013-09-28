@@ -6,7 +6,8 @@ enum class Action {
     MOVE_UP,
     MOVE_RIGHT,
     MOVE_DOWN,
-    PICK_GOLD
+    PICK_GOLD,
+    DONE
 };
 
 #endif // GOLDMINE_ACTIONS_H_

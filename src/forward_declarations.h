@@ -7,6 +7,6 @@ enum class MatrixItem;
 
 class Agent;
 class Environment;
-class Perception;
+struct Perception;
 
 #endif // GOLDMINE_FORWARDDECLARATIONS_H_

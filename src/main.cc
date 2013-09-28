@@ -79,6 +79,9 @@ try {
     SearchStrategyType type = ConvertToStrategy(argv[2]);
 
     env.set_agent(std::unique_ptr<Agent>(new Agent(type)));
+
+    env.Run();
+
     return 0;
     
 } catch(const input_error& err) {

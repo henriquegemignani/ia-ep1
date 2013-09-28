@@ -6,8 +6,9 @@
 #include <cassert>
     
 int Perception::CalculateScore(const State& state) const {
-    int num_steps = state.size_ - state.picked_gold_.size();
-    int score = state.picked_gold_.size() * 4 * matrix_.size() - num_steps;
+    int num_gold = static_cast<int>(state.picked_gold_.size());
+    int num_steps = state.size_ - num_gold;
+    int score = num_gold * 4 * matrix_.size() - num_steps;
     return score;
 }
 

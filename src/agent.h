@@ -7,10 +7,11 @@
 #include <functional>
 #include <memory>
 
-std::queue<Action> BreadthFirstStrategy(const Perception&, const std::shared_ptr<const State>&);
-std::queue<Action> LimitedDepthFirstStrategy(const Perception&, const std::shared_ptr<const State>&);
+typedef std::function<StatePtr(const Perception&, const StatePtr&)> ResultCheck;
+typedef std::function<StatePtr(const Perception&, const StatePtr&, const ResultCheck&)> Strategy;
 
-typedef std::function<std::queue<Action>(const Perception&, const std::shared_ptr<const State>&)> Strategy;
+StatePtr BreadthFirstStrategy(const Perception&, const StatePtr&, const ResultCheck&);
+StatePtr LimitedDepthFirstStrategy(const Perception&, const StatePtr&, const ResultCheck&);
 
 class Agent {
   public:
@@ -21,6 +22,9 @@ class Agent {
   private:
     Strategy strategy_;
     std::queue<Action> next_actions_;
+
+    StatePtr SearchForFixedGold(const Perception&, const StatePtr&, std::size_t num_gold);
+    void Think(const Perception&, const StatePtr&);
 };
 
 #endif // GOLDMINE_AGENT_H_

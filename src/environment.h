@@ -39,8 +39,6 @@ struct Perception {
     bool IsValidAction(Action, const State&) const;
 };
 
-typedef std::shared_ptr<const State> StatePtr;
-
 struct State : public std::enable_shared_from_this<State> {
     State() : next_action_(Action::DONE), size_(0) {}
     State(const State&) = default;

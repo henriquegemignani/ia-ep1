@@ -3,30 +3,12 @@
 
 #include "forward_declarations.h"
 #include "actions.h"
+#include "mapmatrix.h"
 
 #include <vector>
 #include <memory>
 #include <utility>
 #include <set>
-
-class MapMatrix {
-  public:
-    MapMatrix();
-
-    int size() const;
-    void clear();
-    void resize(int n);
-
-    std::vector<bool>& operator[](int n);
-
-    bool operator() (int x, int y) const;
-    bool operator() (const Position&) const;
-
-    bool IsInside(const Position&) const;
-
-  private:
-    std::vector<std::vector<bool>> data_;
-};
 
 struct Position {
     Position() : x(0), y(0) {}

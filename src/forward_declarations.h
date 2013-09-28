@@ -6,6 +6,7 @@ enum class SearchStrategyType;
 
 class Agent;
 class Environment;
+class MapMatrix;
 struct Perception;
 struct Position;
 

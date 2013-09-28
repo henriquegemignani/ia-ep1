@@ -9,6 +9,7 @@
 #include <memory>
 #include <utility>
 #include <set>
+#include <map>
 
 struct Position {
     Position() : x(0), y(0) {}
@@ -16,6 +17,9 @@ struct Position {
 
     bool operator< (const Position& right) const {
         return (x < right.x) || (x == right.x && y < right.y);
+    }
+    bool operator== (const Position& right) const {
+        return !((*this < right) && (right < *this));
     }
 
     int x, y;
@@ -35,6 +39,15 @@ struct Perception {
 };
 
 struct State {
+    State() = default;
+    State(const State&) = default;
+    State& operator=(const State&) = default;
+    State(State&& r)
+        : actions_(std::move(r.actions_))
+        , picked_gold_(std::move(r.picked_gold_))
+        , agent_position_(r.agent_position_) {}
+
+
     std::vector<Action> actions_;
     std::set<Position> picked_gold_;
     Position agent_position_;

@@ -3,7 +3,8 @@
 #include "agent.h"
 #include "errors.h"
 
-#include <cassert>    
+#include <cassert>
+    
 int Perception::CalculateScore(const State& state) const {
     int score = 0;
     for (Action a : state.actions_) {

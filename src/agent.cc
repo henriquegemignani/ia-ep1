@@ -5,6 +5,8 @@
 #include "environment.h"
 
 #include <map>
+#include <list>    
+#include <utility>
     
 char to_str(Action a) {
     switch (a) {
@@ -28,49 +30,85 @@ void dump_path(const std::vector<Action>& path) {
 static auto action_list = { Action::PICK_GOLD, Action::MOVE_DOWN, Action::MOVE_RIGHT,
         Action::MOVE_LEFT, Action::MOVE_UP };
 
-std::queue<Action> BreadthFirstStrategy(const Perception& perception,
-                                        const State& initial_state) {
-    std::queue<State> q;
-    std::map<Position, State> best_scores;
+struct QueueItem {
+    QueueItem(State&& s, const std::map<Position, int>& best) 
+        : current_state(std::move(s)), scores(best) {}
 
-    q.push(initial_state);
+    State current_state;
+    std::map<Position, int> scores;
+};
 
-    static int count = 0;
+bool is_worse(const Perception& perception, const State& state, const std::map<Position, int>& best) {
+    auto b = best.find(state.agent_position_);
+    return (b == best.end() || b->second < perception.CalculateScore(state));
+}
+
+std::queue<Action> BreadthFirstStrategy(const Perception& perception, const State& initial_state) {
+    std::list<State> solutions;
+
+    std::queue<QueueItem> q;
+    q.emplace(State(initial_state), std::map<Position, int>());
 
     while (!q.empty()) {
-        State s = q.front();
+        QueueItem qi = q.front();
         q.pop();
 
-        int new_score = perception.CalculateScore(s);
-        auto previous_score = best_scores.find(s.agent_position_);
-        if (previous_score != best_scores.end() && 
-            perception.CalculateScore(previous_score->second) > new_score)
-            continue;
-        best_scores[s.agent_position_] = s;
+        State& s = qi.current_state;
+        if (s.agent_position_ == Position(0, 0))
+            solutions.push_back(s);
 
-        dump_path(s.actions_);
-        printf(" --> %d\n", new_score);
-
-        if (++count == 10) {
-            int i;
-            scanf("%d", &i);
-            count = 0;
-        }
+        qi.scores[s.agent_position_] = perception.CalculateScore(s);
 
         for (Action a : action_list) {
             if (perception.IsValidAction(a, s)) {
                 State new_state = s.ExecuteAction(a);
-                q.push(std::move(new_state));
+                if (is_worse(perception, new_state, qi.scores))
+                    q.emplace(std::move(new_state), qi.scores);
             }
         }
     }
 
-    puts("DA BEST?");
-    dump_path(best_scores[Position(0, 0)].actions_);
-    printf(" --> %d\n", perception.CalculateScore(best_scores[Position(0, 0)]));
+    puts("SOLUTIONS:");
+    auto best_solution = solutions.begin();
+    for (auto sol = solutions.begin(); sol != solutions.end(); ++sol) {
+        if (perception.CalculateScore(*sol) > perception.CalculateScore(*best_solution))
+            best_solution = sol;
+    }
+
+    puts("FIRST BEST ONE FOUND:");
+    dump_path(best_solution->actions_);
+    printf(" --> %d\n", perception.CalculateScore(*best_solution));
 
     std::queue<Action> result;
-    for (Action a : best_scores[Position(0, 0)].actions_)
+    for (Action a : best_solution->actions_)
+        result.push(a);
+    result.push(Action::DONE);
+    return result;
+}
+
+std::list<Action> RecursiveDepthFirst(const Perception& perception, const State& state, std::map<Position, int> best) {
+    if (state.actions_.size() > 30) return std::list<Action>();
+    best[state.agent_position_] = perception.CalculateScore(state);
+    for (Action a : action_list) {
+        if (perception.IsValidAction(a, state)) {
+            State new_state = state.ExecuteAction(a);
+            if (!is_worse(perception, new_state, best)) {
+                auto r = RecursiveDepthFirst(perception, new_state, best);
+                if (!r.empty()) {
+                    r.push_front(a);
+                    return r;
+                }
+            }
+        }
+    }
+    return std::list<Action>();
+}
+
+std::queue<Action> LimitedDepthFirstStrategy(const Perception& perception, const State& initial_state) {
+    std::map<Position, int> best;
+    auto result_list = RecursiveDepthFirst(perception, initial_state, best);
+    std::queue<Action> result;
+    for (Action a : result_list)
         result.push(a);
     result.push(Action::DONE);
     return result;
@@ -79,6 +117,7 @@ std::queue<Action> BreadthFirstStrategy(const Perception& perception,
 Strategy findStrategy(SearchStrategyType type) {
     switch(type) {
     case SearchStrategyType::BREADTH_FIRST: return BreadthFirstStrategy;
+    case SearchStrategyType::LIMITED_DEPTH_FIRST: return LimitedDepthFirstStrategy;
     default: throw input_error("Strategy not yet implemented.");
     }
 }

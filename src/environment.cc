@@ -3,13 +3,15 @@
 #include "agent.h"
 #include "errors.h"
 
+#include <cassert>
+
 Environment::Environment() {}
 
 Environment::~Environment() {}
 
 void Environment::Run() {
     while (true) {
-        Action a = agent_->CalculateNextAction(data_);
+        Action a = agent_->CalculateNextAction(data_, current_state_);
         if (a == Action::DONE)
             break;
         ExecuteAction(a);
@@ -86,6 +88,7 @@ void Environment::ExecuteAction(Action a) {
         case Action::MOVE_RIGHT: current_state_.agent_position_.x += 1; break;
         case Action::MOVE_LEFT:  current_state_.agent_position_.x -= 1; break;
         case Action::PICK_GOLD:  current_state_.picked_gold_.insert(current_state_.agent_position_); break;
+        default: assert(false);
     }
     current_state_.actions_.push_back(a);
 }

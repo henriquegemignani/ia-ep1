@@ -3,7 +3,9 @@
 #include "actions.h"
 #include "errors.h"
 
-void BreadthFirstStrategy(const Perception& perception, std::queue<Action>& actions) {
+void BreadthFirstStrategy(const Perception& /*perception*/, 
+                          const State& /*current_state*/,
+                          std::queue<Action>& actions) {
     
     actions.push(Action::DONE);
 }
@@ -17,9 +19,9 @@ Strategy findStrategy(SearchStrategyType type) {
 
 Agent::Agent(SearchStrategyType type) : strategy_(findStrategy(type)) {}
 
-Action Agent::CalculateNextAction(const Perception& perception) {
+Action Agent::CalculateNextAction(const Perception& perception, const State& current_state) {
     if(next_actions_.empty())
-        strategy_(perception, next_actions_);
+        strategy_(perception, current_state, next_actions_);
 
     Action result = next_actions_.front();
     next_actions_.pop();

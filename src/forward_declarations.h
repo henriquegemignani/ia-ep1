@@ -8,6 +8,7 @@ class Agent;
 class Environment;
 class MapMatrix;
 struct Perception;
+struct State;
 struct Position;
 
 #endif // GOLDMINE_FORWARDDECLARATIONS_H_

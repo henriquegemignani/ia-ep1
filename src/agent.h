@@ -13,13 +13,13 @@ enum class SearchStrategyType {
     A_STAR
 };
 
-typedef std::function<void (const Perception&, std::queue<Action>&)> Strategy;
+typedef std::function<void(const Perception&, const State& current_state, std::queue<Action>&)> Strategy;
 
 class Agent {
   public:
     Agent(SearchStrategyType type);
     
-    Action CalculateNextAction(const Perception& perception);
+    Action CalculateNextAction(const Perception& perception, const State& current_state);
     
   private:
     Strategy strategy_;

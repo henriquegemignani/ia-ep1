@@ -67,7 +67,7 @@ void openFile(const std::string& filename, MapMatrix& matrix, std::set<Position>
             }
         }
     }
-    if (gold_locations.size() != matrix.size() / 2)
+    if (static_cast<int>(gold_locations.size()) != matrix.size() / 2)
         throw input_error("Wrong ammount of gold locations. Expected " 
                     + std::to_string(matrix.size() / 2)
                     + " got " + std::to_string(gold_locations.size()));

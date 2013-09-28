@@ -43,9 +43,9 @@ void openFile(const std::string& filename, MapMatrix& matrix, std::set<Position>
     if(size < 1 || size > 50)
         throw input_error("Invalid size, size must be in range [1, 50].");
     
-    matrix.resize(size, std::vector<bool>(size, false));
+    matrix.resize(size);
     
-    for (MapMatrix::size_type j = 0; j < matrix.size(); ++j) {
+    for (int j = 0; j < matrix.size(); ++j) {
         auto& matrix_line = matrix[j];
 
         getline(input, line);
@@ -72,7 +72,7 @@ void openFile(const std::string& filename, MapMatrix& matrix, std::set<Position>
                     + std::to_string(matrix.size() / 2)
                     + " got " + std::to_string(gold_locations.size()));
     
-    assert(matrix.size() == static_cast<MapMatrix::size_type>(size));
+    assert(matrix.size() == size);
     
 }
 

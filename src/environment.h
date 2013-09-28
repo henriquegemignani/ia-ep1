@@ -9,7 +9,24 @@
 #include <utility>
 #include <set>
 
-typedef std::vector<std::vector<bool>> MapMatrix;
+class MapMatrix {
+  public:
+    MapMatrix();
+
+    int size() const;
+    void clear();
+    void resize(int n);
+
+    std::vector<bool>& operator[](int n);
+
+    bool operator() (int x, int y) const;
+    bool operator() (const Position&) const;
+
+    bool IsInside(const Position&) const;
+
+  private:
+    std::vector<std::vector<bool>> data_;
+};
 
 struct Position {
     Position() : x(0), y(0) {}
@@ -22,10 +39,19 @@ struct Position {
     int x, y;
 };
 
+template<class T>
+inline bool is_in(const std::set<T>& s, const T& v) {
+    return s.find(v) != s.end();
+}
+
 struct Perception {
     MapMatrix matrix_;
     std::set<Position> gold_locations_;
+};
+
+struct State {
     std::vector<Action> actions_;
+    std::set<Position> picked_gold_;
     Position agent_position_;
 };
 
@@ -46,6 +72,8 @@ class Environment {
   private:
     // Store the data in the perception object for simplicity.
     Perception data_;
+
+    State current_state_;
 
     std::unique_ptr<Agent> agent_;
     

@@ -55,8 +55,8 @@ void openFile(const std::string& filename, MapMatrix& matrix, std::set<Position>
         for (std::string::size_type i = 0; i < line.size(); ++i) {
             switch (line[i]) {
                 case '*':
-                    gold_locations.emplace(static_cast<int>(i),
-                                           static_cast<int>(j));
+                    gold_locations.insert(Position(static_cast<int>(i),
+                                                   static_cast<int>(j)));
                     // No break on purpose.
                 case '0':
                     matrix_line[i] = false; break;

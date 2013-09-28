@@ -10,86 +10,81 @@
 
 namespace {
 
-char to_str(Action a) {
-    switch (a) {
-        case Action::MOVE_LEFT: return 'E';
-        case Action::MOVE_UP: return 'C';
-        case Action::MOVE_RIGHT: return 'D';
-        case Action::MOVE_DOWN: return 'B';
-        case Action::PICK_GOLD: return 'P';
-        default:
-            throw input_error("imprimindo action invalido");
-    }
+auto action_list = { Action::MOVE_DOWN, Action::MOVE_RIGHT, Action::MOVE_LEFT, Action::MOVE_UP };
 
+StatePtr GoldPicker(const Perception& perception, const StatePtr& state) {
+    if (perception.IsValidAction(Action::PICK_GOLD, *state))
+        return state->ExecuteAction(Action::PICK_GOLD);
+    return StatePtr();
 }
 
-void dump_path(const std::list<Action>& path) {
-    for (Action a : path)
-        printf("%c ", to_str(a));
+StatePtr ExitSearcher(const Perception& perception, const StatePtr& state) {
+    if (state->agent_position_ == Position(0, 0))
+        return state;
+    return StatePtr();
 }
 
-auto action_list = { Action::PICK_GOLD, Action::MOVE_DOWN, Action::MOVE_RIGHT,
-    Action::MOVE_LEFT, Action::MOVE_UP };
+template<class ResultCheck>
+StatePtr BreadthSearch(const Perception& perception, const StatePtr& initial_state, const ResultCheck& result_checker) {
+    std::queue<StatePtr> q;
+    q.emplace(initial_state);
 
-struct QueueItem {
-    QueueItem(std::shared_ptr<const State>&& s, const std::map<Position, int>& best)
-        : current_state(std::move(s)), scores(best) {}
-
-    std::shared_ptr<const State> current_state;
-    std::map<Position, int> scores;
-};
-
-bool is_better(const Perception& perception, const State& state, const std::map<Position, int>& best) {
-    auto b = best.find(state.agent_position_);
-    return (b == best.end() || b->second < perception.CalculateScore(state));
-}
-
-}
-
-std::queue<Action> BreadthFirstStrategy(const Perception& perception, const std::shared_ptr<const State>& initial_state) {
-    std::pair<std::shared_ptr<const State>, int> best_solution(initial_state, 0);
-
-    std::queue<QueueItem> q;
-    q.emplace(std::shared_ptr<const State>(initial_state), std::map<Position, int>());
+    std::set<Position> visited;
 
     while (!q.empty()) {
-        QueueItem& qi = q.front();
+        StatePtr& s = q.front();
 
-        std::shared_ptr<const State>& s = qi.current_state;
-        int s_score = perception.CalculateScore(*s);
+        if (auto result = result_checker(perception, s))
+            return result;
 
-        // Is this a solution, and is it better than the best solution?
-        if (s->agent_position_ == Position(0, 0) && s_score > best_solution.second) {
-            best_solution.first = s;
-            best_solution.second = s_score;
-        }
-
-        qi.scores[s->agent_position_] = s_score;
+        visited.insert(s->agent_position_);
 
         // For every possible action
         for (Action a : action_list) {
             // If we can do this action
             if (perception.IsValidAction(a, *s)) {
                 // Do it
-                std::shared_ptr<const State> new_state = s->ExecuteAction(a);
+                StatePtr new_state = s->ExecuteAction(a);
 
-                // Then check if we haven't reached this place with a better score.
-                if (is_better(perception, *new_state, qi.scores))
-                    q.emplace(std::move(new_state), qi.scores);
+                // If we haven't visited this place, queue it.
+                if (visited.find(new_state->agent_position_) == visited.end())
+                    q.emplace(new_state);
             }
         }
 
         q.pop();
     }
+    throw input_error("Couldn't find route to any gold, but only picked " + std::to_string(initial_state->picked_gold_.size()));
+    return StatePtr();
+}
 
-    std::list<Action> best_path = best_solution.first->CreateActionList();
+std::shared_ptr<const State> BreadthFetchFixedGold(const Perception& perception, const StatePtr& initial_state, size_t num_gold) {
+    StatePtr result = initial_state;
+    for (; num_gold > 0; --num_gold)
+        result = BreadthSearch(perception, result, GoldPicker);
+    return BreadthSearch(perception, result, ExitSearcher);
+}
 
-    puts("BEST SOLUTION:");
-    dump_path(best_path);
-    printf(" --> %d\n", best_solution.second);
+}
+
+std::queue<Action> BreadthFirstStrategy(const Perception& perception, const std::shared_ptr<const State>& initial_state) {
+    std::list < std::shared_ptr<const State> > gold_routes;
+
+    // Doing nothing is a valid strategy and may be the optimal one.
+    gold_routes.emplace_back(initial_state);
+
+    // Try to pick each gold quantity;
+    for (size_t num_gold_fetched = 1; num_gold_fetched <= perception.gold_locations_.size(); ++num_gold_fetched) {
+        gold_routes.emplace_back(BreadthFetchFixedGold(perception, initial_state, num_gold_fetched));
+    }
+
+    auto best = gold_routes.begin();
+    for (auto sol = gold_routes.begin(); sol != gold_routes.end(); ++sol)
+        if (perception.CalculateScore(**sol) > perception.CalculateScore(**best))
+            best = sol;
 
     std::queue<Action> result;
-    for (Action a : best_path)
+    for (Action a : (*best)->CreateActionList())
         result.push(a);
     result.push(Action::DONE);
     return result;

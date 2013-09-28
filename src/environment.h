@@ -39,6 +39,8 @@ struct Perception {
     bool IsValidAction(Action, const State&) const;
 };
 
+typedef std::shared_ptr<const State> StatePtr;
+
 struct State : public std::enable_shared_from_this<State> {
     State() : next_action_(Action::DONE), size_(0) {}
     State(const State&) = default;
@@ -50,13 +52,13 @@ struct State : public std::enable_shared_from_this<State> {
         , agent_position_(r.agent_position_) {}
 
 
-    std::shared_ptr<const State> previous_;
+    StatePtr previous_;
     Action next_action_;
     int size_;
     std::set<Position> picked_gold_;
     Position agent_position_;
 
-    std::shared_ptr<const State> ExecuteAction(Action) const;
+    StatePtr ExecuteAction(Action) const;
     std::list<Action> CreateActionList() const;
 };
 

@@ -8,6 +8,19 @@
 #include <stdexcept>
 #include <cassert>
 
+char ActionToChar(Action a) {
+    switch (a) {
+        case Action::MOVE_LEFT: return 'E';
+        case Action::MOVE_UP: return 'C';
+        case Action::MOVE_RIGHT: return 'D';
+        case Action::MOVE_DOWN: return 'B';
+        case Action::PICK_GOLD: return 'P';
+        default: break;
+    }
+    throw input_error("Converting Action with no textual representation.");
+    return '\0';
+}
+
 Strategy ConvertToStrategy(const std::string& identifier) {
     if(identifier.size() == 1) {
         switch(identifier[0]) {
@@ -91,7 +104,9 @@ try {
     auto result = env.Run();
 
     printf("%d pontos\n", env.data().CalculateScore(*result));
-
+    for (Action a : result->CreateActionList())
+        printf("%c ", ActionToChar(a));
+    puts("");
     return 0;
     
 } catch(const input_error& err) {

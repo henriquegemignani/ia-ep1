@@ -41,6 +41,5 @@ StatePtr BreadthFirstStrategy(const Perception& perception, const StatePtr& init
 
         q.pop();
     }
-    throw input_error("Couldn't find route to any gold, but only picked " + std::to_string(initial_state->picked_gold_.size()));
     return StatePtr();
 }

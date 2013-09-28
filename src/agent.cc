@@ -32,18 +32,24 @@ StatePtr Agent::SearchForFixedGold(const Perception& perception, const StatePtr&
     StatePtr result = initial_state;
     for (; num_gold > 0; --num_gold)
         result = strategy_(perception, result, GoldPicker);
+    if (!result)
+        return result;
     return strategy_(perception, result, ExitSearcher);
 }
 
 void Agent::Think(const Perception& perception, const StatePtr& initial_state) {
-    std::list < std::shared_ptr<const State> > gold_routes;
+    std::list<StatePtr> gold_routes;
 
     // Doing nothing is a valid strategy and may be the optimal one.
     gold_routes.emplace_back(initial_state);
 
     // Try to pick each gold quantity;
     for (size_t num_gold_fetched = 1; num_gold_fetched <= perception.gold_locations_.size(); ++num_gold_fetched) {
-        gold_routes.emplace_back(SearchForFixedGold(perception, initial_state, num_gold_fetched));
+        StatePtr route = SearchForFixedGold(perception, initial_state, num_gold_fetched);
+        if (route)
+            gold_routes.emplace_back(route);
+        else
+            break;
     }
 
     auto best = gold_routes.begin();

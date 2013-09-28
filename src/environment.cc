@@ -7,7 +7,7 @@
     
 int Perception::CalculateScore(const State& state) const {
     int score = 0;
-    for (Action a : state.actions_) {
+    for (Action a : state.CreateActionList()) {
         switch (a) {
             case Action::MOVE_DOWN:
             case Action::MOVE_UP:
@@ -62,33 +62,49 @@ bool Perception::IsValidAction(Action a, const State& state) const {
     }
 }
 
-State State::ExecuteAction(Action a) const {
-    State result(*this);
+std::shared_ptr<const State> State::ExecuteAction(Action a) const {
+    std::shared_ptr<State> result(new State(*this));
+    result->previous_ = shared_from_this();
 
     switch (a) {
-        case Action::MOVE_DOWN:  result.agent_position_.y += 1; break;
-        case Action::MOVE_UP:    result.agent_position_.y -= 1; break;
-        case Action::MOVE_RIGHT: result.agent_position_.x += 1; break;
-        case Action::MOVE_LEFT:  result.agent_position_.x -= 1; break;
-        case Action::PICK_GOLD:  result.picked_gold_.insert(agent_position_); break;
+        case Action::MOVE_DOWN:  result->agent_position_.y += 1; break;
+        case Action::MOVE_UP:    result->agent_position_.y -= 1; break;
+        case Action::MOVE_RIGHT: result->agent_position_.x += 1; break;
+        case Action::MOVE_LEFT:  result->agent_position_.x -= 1; break;
+        case Action::PICK_GOLD:  result->picked_gold_.insert(agent_position_); break;
         default: assert(false);
     }
-    result.actions_.push_back(a);
+    result->next_action_ = a;
+    return result;
+}
+    
+namespace {
+void to_action_list(const State& state, std::list<Action>& result) {
+    if (state.previous_)
+        to_action_list(*state.previous_, result);
+    if (state.next_action_ != Action::DONE)
+        result.push_back(state.next_action_);
+}
+}
+
+std::list<Action> State::CreateActionList() const {
+    std::list<Action> result;
+    to_action_list(*this, result);
     return result;
 }
 
-Environment::Environment() {}
+Environment::Environment() : current_state_(new State) {}
 
 Environment::~Environment() {}
 
-State Environment::Run() {
+std::shared_ptr<const State> Environment::Run() {
     while (true) {
         Action a = agent_->CalculateNextAction(data_, current_state_);
         if (a == Action::DONE)
             break;
-        if (!data_.IsValidAction(a, current_state_))
+        if (!data_.IsValidAction(a, *current_state_))
             throw input_error("Agent requested invalid action.");
-        current_state_ = current_state_.ExecuteAction(a);
+        current_state_ = current_state_->ExecuteAction(a);
     }
     return current_state_;
 }

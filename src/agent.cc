@@ -4,7 +4,7 @@
 
 Agent::Agent(const Strategy& strategy) : strategy_(strategy) {}
 
-Action Agent::CalculateNextAction(const Perception& perception, const State& current_state) {
+Action Agent::CalculateNextAction(const Perception& perception, const std::shared_ptr<const State>& current_state) {
     if(next_actions_.empty())
         next_actions_ = strategy_(perception, current_state);
 

@@ -5,17 +5,18 @@
 #include "actions.h"
 #include <queue>
 #include <functional>
+#include <memory>
 
-std::queue<Action> BreadthFirstStrategy(const Perception&, const State&);
-std::queue<Action> LimitedDepthFirstStrategy(const Perception&, const State&);
+std::queue<Action> BreadthFirstStrategy(const Perception&, const std::shared_ptr<const State>&);
+std::queue<Action> LimitedDepthFirstStrategy(const Perception&, const std::shared_ptr<const State>&);
 
-typedef std::function<std::queue<Action> (const Perception&, const State&)> Strategy;
+typedef std::function<std::queue<Action>(const Perception&, const std::shared_ptr<const State>&)> Strategy;
 
 class Agent {
   public:
     Agent(const Strategy& strategy);
     
-    Action CalculateNextAction(const Perception& perception, const State& current_state);
+    Action CalculateNextAction(const Perception& perception, const std::shared_ptr<const State>& current_state);
     
   private:
     Strategy strategy_;

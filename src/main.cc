@@ -88,9 +88,9 @@ try {
 
     env.set_agent(std::unique_ptr<Agent>(new Agent(ConvertToStrategy(argv[2]))));
 
-    State result = env.Run();
+    auto result = env.Run();
 
-    printf("%d pontos\n", env.data().CalculateScore(result));
+    printf("%d pontos\n", env.data().CalculateScore(*result));
 
     return 0;
     

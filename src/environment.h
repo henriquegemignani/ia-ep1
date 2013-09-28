@@ -19,7 +19,7 @@ struct Position {
         return (x < right.x) || (x == right.x && y < right.y);
     }
     bool operator== (const Position& right) const {
-        return !((*this < right) && (right < *this));
+        return x == right.x && y == right.y;
     }
 
     int x, y;

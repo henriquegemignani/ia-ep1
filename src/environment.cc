@@ -9,7 +9,7 @@ Environment::~Environment() {}
 
 void Environment::Run() {
     while (true) {
-        Action a = agent_->CalculateNextAction(Perception(matrix_, actions_, agent_position_));
+        Action a = agent_->CalculateNextAction(data_);
         if (a == Action::DONE)
             break;
         ExecuteAction(a);
@@ -24,22 +24,22 @@ bool Environment::IsValidAction(Action a) const {
     switch (a) {
     case Action::MOVE_DOWN:
         return (agent_position_.y < static_cast<int>(matrix_.size() - 1) &&
-            matrix_[agent_position_.y + 1][agent_position_.x] != MatrixItem::OBSTACLE);
+            !matrix_[agent_position_.y + 1][agent_position_.x]);
 
     case Action::MOVE_UP:
         return (agent_position_.y > 0 &&
-            matrix_[agent_position_.y - 1][agent_position_.x] != MatrixItem::OBSTACLE);
+            !matrix_[agent_position_.y - 1][agent_position_.x]);
 
     case Action::MOVE_RIGHT:
         return (agent_position_.x < static_cast<int>(matrix_.size() - 1) &&
-            matrix_[agent_position_.y][agent_position_.x + 1] != MatrixItem::OBSTACLE);
+            !matrix_[agent_position_.y][agent_position_.x + 1]);
 
     case Action::MOVE_LEFT:
         return (agent_position_.x > 0 &&
-            matrix_[agent_position_.y][agent_position_.x - 1] != MatrixItem::OBSTACLE);
+            !matrix_[agent_position_.y][agent_position_.x - 1]);
 
     case Action::PICK_GOLD:
-        return matrix_[agent_position_.y][agent_position_.x] == MatrixItem::GOLD;
+        return gold_locations_.find(agent_position_) != gold_locations_.end();
 
     default:
         return false;
@@ -74,7 +74,7 @@ void Environment::ExecuteAction(Action a) {
     case Action::MOVE_UP:    agent_position_.y -= 1; break;
     case Action::MOVE_RIGHT: agent_position_.x += 1; break;
     case Action::MOVE_LEFT:  agent_position_.x -= 1; break;
-    case Action::PICK_GOLD:  matrix_[agent_position_.y][agent_position_.x] = MatrixItem::EMPTY; break;
+    case Action::PICK_GOLD:  gold_locations_.erase(agent_position_); break;
     }
     actions_.push_back(a);
 }

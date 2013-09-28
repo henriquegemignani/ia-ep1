@@ -8,17 +8,6 @@
 #include <stdexcept>
 #include <cassert>
 
-MatrixItem ConvertToMatrixItem(char c) {
-    switch(c) {
-    case '0': return MatrixItem::EMPTY;
-    case '1': return MatrixItem::OBSTACLE;
-    case '*': return MatrixItem::GOLD;
-    default:
-        throw input_error(std::string("Unknown character '") + c + "'");
-    }
-    return MatrixItem::INVALID;
-}
-
 SearchStrategyType ConvertToStrategy(const std::string& identifier) {
     if(identifier.size() == 1) {
         switch(identifier[0]) {
@@ -33,12 +22,13 @@ SearchStrategyType ConvertToStrategy(const std::string& identifier) {
     return SearchStrategyType::INVALID;
 }
 
-void openFile(const std::string& filename, MapMatrix& matrix) {
+void openFile(const std::string& filename, MapMatrix& matrix, std::set<Position>& gold_locations) {
     std::ifstream input(filename);
     if(!input.is_open())
         throw input_error("Unable to open file '" + filename + "'.");
     
     matrix.clear();
+    gold_locations.clear();
     
     std::string line;
     getline(input, line);
@@ -53,16 +43,34 @@ void openFile(const std::string& filename, MapMatrix& matrix) {
     if(size < 1 || size > 50)
         throw input_error("Invalid size, size must be in range [1, 50].");
     
-    matrix.resize(size, std::vector<MatrixItem>(size));
+    matrix.resize(size, std::vector<bool>(size, false));
     
-    for(auto& matrix_line : matrix) {
+    for (MapMatrix::size_type j = 0; j < matrix.size(); ++j) {
+        auto& matrix_line = matrix[j];
+
         getline(input, line);
         if(line.size() != matrix_line.size())
             throw input_error("'" + line + "' size doesn't match declared size.");
             
-        for(std::string::size_type i = 0; i < line.size(); ++i)
-            matrix_line[i] = ConvertToMatrixItem(line[i]);
+        for (std::string::size_type i = 0; i < line.size(); ++i) {
+            switch (line[i]) {
+                case '*':
+                    gold_locations.emplace(static_cast<int>(i),
+                                           static_cast<int>(j));
+                    // No break on purpose.
+                case '0':
+                    matrix_line[i] = false; break;
+                case '1':
+                    matrix_line[i] = true; break;
+                default:
+                    throw input_error(std::string("Unknown character '") + line[i] + "' on line ");
+            }
+        }
     }
+    if (gold_locations.size() != matrix.size() / 2)
+        throw input_error("Wrong ammount of gold locations. Expected " 
+                    + std::to_string(matrix.size() / 2)
+                    + " got " + std::to_string(gold_locations.size()));
     
     assert(matrix.size() == static_cast<MapMatrix::size_type>(size));
     
@@ -74,9 +82,10 @@ try {
         fprintf(stderr, "Usage: %s <map-file-path> <search-type>\n", argv[0]);
         return EXIT_SUCCESS;
     }
-    Environment env;
-    openFile(argv[1], env.matrix());
     SearchStrategyType type = ConvertToStrategy(argv[2]);
+
+    Environment env;
+    openFile(argv[1], env.matrix(), env.gold_locations());
 
     env.set_agent(std::unique_ptr<Agent>(new Agent(type)));
 

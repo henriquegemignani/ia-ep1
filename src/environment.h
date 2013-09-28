@@ -7,28 +7,26 @@
 #include <vector>
 #include <memory>
 #include <utility>
+#include <set>
 
-enum class MatrixItem {
-    INVALID,
-    EMPTY,
-    OBSTACLE,
-    GOLD
-};
-
-typedef std::vector<std::vector<MatrixItem>> MapMatrix;
+typedef std::vector<std::vector<bool>> MapMatrix;
 
 struct Position {
     Position() : x(0), y(0) {}
+    Position(int _x, int _y) : x(_x), y(_y) {}
+
+    bool operator< (const Position& right) const {
+        return (x < right.x) || (x == right.x && y < right.y);
+    }
+
     int x, y;
 };
 
 struct Perception {
-    Perception(const MapMatrix& m, const std::vector<Action>& a, const Position& p)
-        : matrix(m), actions(a), agent_position(p) {}
-
-    const MapMatrix& matrix;
-    const std::vector<Action>& actions;
-    const Position& agent_position;
+    MapMatrix matrix_;
+    std::set<Position> gold_locations_;
+    std::vector<Action> actions_;
+    Position agent_position_;
 };
 
 class Environment {
@@ -42,14 +40,15 @@ class Environment {
     bool IsValidAction(Action) const;
     int CalculateScore() const;
 
-    const MapMatrix& matrix() const { return matrix_; }
-          MapMatrix& matrix()       { return matrix_; }
+             MapMatrix& matrix()         { return data_.matrix_; }
+    std::set<Position>& gold_locations() { return data_.gold_locations_; }
     
   private:
-    MapMatrix matrix_;
-    std::vector<Action> actions_;
+    // Store the data in the perception object for simplicity.
+    Perception data_;
+
     std::unique_ptr<Agent> agent_;
-    Position agent_position_;
+    
 
     void ExecuteAction(Action);
     

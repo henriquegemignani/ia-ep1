@@ -3,7 +3,6 @@
 
 enum class Action;
 enum class SearchStrategyType;
-enum class MatrixItem;
 
 class Agent;
 class Environment;

@@ -3,7 +3,8 @@
 #include "actions.h"
 #include "errors.h"
 
-void BreadthFirstStrategy(const Perception&, std::queue<Action>& actions) {
+void BreadthFirstStrategy(const Perception& perception, std::queue<Action>& actions) {
+    
     actions.push(Action::DONE);
 }
 

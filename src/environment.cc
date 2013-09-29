@@ -6,7 +6,7 @@
 #include <cassert>
     
 int Perception::CalculateScore(const State& state) const {
-    int num_gold = static_cast<int>(state.picked_gold_.size());
+    int num_gold = static_cast<int>(state.picked_gold_->size());
     int num_steps = state.size_ - num_gold;
     int score = num_gold * 4 * matrix_.size() - num_steps;
     return score;
@@ -40,7 +40,7 @@ bool Perception::IsValidAction(Action a, const State& state) const {
 
         case Action::PICK_GOLD: {
             return is_in(gold_locations_, state.agent_position_) &&
-                !is_in(state.picked_gold_, state.agent_position_);
+                !is_in(*state.picked_gold_, state.agent_position_);
         }
 
         default: {
@@ -58,7 +58,10 @@ std::shared_ptr<const State> State::ExecuteAction(Action a) const {
         case Action::MOVE_UP:    result->agent_position_.y -= 1; break;
         case Action::MOVE_RIGHT: result->agent_position_.x += 1; break;
         case Action::MOVE_LEFT:  result->agent_position_.x -= 1; break;
-        case Action::PICK_GOLD:  result->picked_gold_.insert(agent_position_); break;
+        case Action::PICK_GOLD:
+            result->picked_gold_ = std::shared_ptr<std::set<Position>>(new std::set<Position>(*this->picked_gold_));
+            result->picked_gold_->insert(agent_position_);
+            break;
         default: assert(false);
     }
     result->next_action_ = a;

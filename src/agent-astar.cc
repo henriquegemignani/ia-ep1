@@ -24,7 +24,7 @@ namespace {
     int gold_h_func(const Perception& perception, const StatePtr& state) {
         int dist = std::numeric_limits<int>::max();
         for (const Position& gold_pos : perception.gold_locations_) {
-            if (!is_in(state->picked_gold_, gold_pos)) {
+            if (!is_in(*state->picked_gold_, gold_pos)) {
                 dist = std::min(dist, distance(gold_pos, state->agent_position_));
             }
         }

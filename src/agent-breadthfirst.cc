@@ -29,14 +29,15 @@ StatePtr BreadthFirstStrategy(const Perception& perception, const StatePtr& init
         // For every possible action
         for (Action a : action_list) {
             // If we can do this action
-            if (perception.IsValidAction(a, *s)) {
-                // Do it
-                StatePtr new_state = s->ExecuteAction(a);
+            if (!perception.IsValidAction(a, *s))
+                continue;
+            StatePtr new_state = s->ExecuteAction(a);
 
-                // If we haven't visited this place, queue it.
-                if (visited.find(new_state->agent_position_) == visited.end())
-                    q.emplace(new_state);
-            }
+            // If we haven't visited this place, queue it.
+            if (is_in(visited, new_state->agent_position_))
+                continue;
+
+            q.emplace(new_state);
         }
 
         q.pop();

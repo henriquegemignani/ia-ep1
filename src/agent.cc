@@ -17,6 +17,15 @@ namespace {
     }
 }
 
+TargetCheckFunction GetCheckFunction(SearchTarget target) {
+    switch (target) {
+        case SearchTarget::GOLD: return GoldPicker;
+        case SearchTarget::ENTRANCE: return ExitSearcher;
+        default:
+            return TargetCheckFunction();
+    }
+}
+
 Agent::Agent(const Strategy& strategy) : strategy_(strategy) {}
 
 Action Agent::CalculateNextAction(const Perception& perception, const std::shared_ptr<const State>& current_state) {
@@ -31,10 +40,10 @@ Action Agent::CalculateNextAction(const Perception& perception, const std::share
 StatePtr Agent::SearchForFixedGold(const Perception& perception, const StatePtr& initial_state, size_t num_gold) {
     StatePtr result = initial_state;
     for (; num_gold > 0; --num_gold)
-        result = strategy_(perception, result, GoldPicker);
+        result = strategy_(perception, result, SearchTarget::GOLD);
     if (!result)
         return result;
-    return strategy_(perception, result, ExitSearcher);
+    return strategy_(perception, result, SearchTarget::ENTRANCE);
 }
 
 void Agent::Think(const Perception& perception, const StatePtr& initial_state) {

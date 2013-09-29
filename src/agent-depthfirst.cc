@@ -26,7 +26,7 @@ private:
     Position value_;
 };
 
-StatePtr RecursiveLimitedDepthSearch(const Perception& perception, const StatePtr& s, const ResultCheck& checker, VisitSet& visit, size_t max_depth) {
+StatePtr RecursiveLimitedDepthSearch(const Perception& perception, const StatePtr& s, SearchTarget target, VisitSet& visit, size_t max_depth) {
 
     // Mark that this position is visited, and when this function returns mark it's no longer visited.
     InsertRemoveWrapper insert_pos(visit, s->agent_position_);
@@ -34,7 +34,7 @@ StatePtr RecursiveLimitedDepthSearch(const Perception& perception, const StatePt
     if (visit.size() > max_depth)
         return StatePtr();
 
-    if (StatePtr result = checker(perception, s))
+    if (StatePtr result = GetCheckFunction(target)(perception, s))
         return result;
 
     for (Action a : action_list) {
@@ -45,7 +45,7 @@ StatePtr RecursiveLimitedDepthSearch(const Perception& perception, const StatePt
 
             // If we haven't visited this place, queue it.
             if (visit.find(new_state->agent_position_) == visit.end()) {
-                StatePtr recursive = RecursiveLimitedDepthSearch(perception, new_state, checker, visit, max_depth);
+                StatePtr recursive = RecursiveLimitedDepthSearch(perception, new_state, target, visit, max_depth);
                 if (recursive)
                     return recursive;
             }
@@ -56,10 +56,10 @@ StatePtr RecursiveLimitedDepthSearch(const Perception& perception, const StatePt
 
 }
 
-StatePtr LimitedDepthFirstStrategy(const Perception& perception, const StatePtr& initial_state, const ResultCheck& checker) {
+StatePtr LimitedDepthFirstStrategy(const Perception& perception, const StatePtr& initial_state, SearchTarget target) {
     for (size_t max_depth = 1; max_depth < perception.matrix_.size() * perception.matrix_.size(); ++max_depth) {
         VisitSet visit;
-        StatePtr search = RecursiveLimitedDepthSearch(perception, initial_state, checker, visit, max_depth);
+        StatePtr search = RecursiveLimitedDepthSearch(perception, initial_state, target, visit, max_depth);
         if (search)
             return search;
     }

@@ -15,7 +15,7 @@ Strategy ConvertToStrategy(const std::string& identifier) {
         switch(identifier[0]) {
             case 'L': return BreadthFirstStrategy;
             case 'P': return LimitedDepthFirstStrategy;
-            case 'A': throw input_error("Strategy not yet implemented.");
+            case 'A': return AStarStrategy;
             default: 
                 /* Nothing */;
         }

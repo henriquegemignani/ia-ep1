@@ -12,7 +12,7 @@ namespace {
     auto action_list = { Action::MOVE_DOWN, Action::MOVE_RIGHT, Action::MOVE_LEFT, Action::MOVE_UP };
 }
 
-StatePtr BreadthFirstStrategy(const Perception& perception, const StatePtr& initial_state, const ResultCheck& result_checker) {
+StatePtr BreadthFirstStrategy(const Perception& perception, const StatePtr& initial_state, SearchTarget target) {
     std::queue<StatePtr> q;
     q.emplace(initial_state);
 
@@ -21,7 +21,7 @@ StatePtr BreadthFirstStrategy(const Perception& perception, const StatePtr& init
     while (!q.empty()) {
         StatePtr& s = q.front();
 
-        if (auto result = result_checker(perception, s))
+        if (auto result = GetCheckFunction(target)(perception, s))
             return result;
 
         visited.insert(s->agent_position_);

@@ -26,8 +26,8 @@ struct Position {
     int x, y;
 };
 
-template<class T>
-inline bool is_in(const std::set<T>& s, const T& v) {
+template<class T, class Container>
+inline bool is_in(const Container& s, const T& v) {
     return s.find(v) != s.end();
 }
 

@@ -7,11 +7,19 @@
 #include <functional>
 #include <memory>
 
-typedef std::function<StatePtr(const Perception&, const StatePtr&)> ResultCheck;
-typedef std::function<StatePtr(const Perception&, const StatePtr&, const ResultCheck&)> Strategy;
+enum class SearchTarget {
+    GOLD,
+    ENTRANCE
+};
 
-StatePtr BreadthFirstStrategy(const Perception&, const StatePtr&, const ResultCheck&);
-StatePtr LimitedDepthFirstStrategy(const Perception&, const StatePtr&, const ResultCheck&);
+typedef std::function<StatePtr(const Perception&, const StatePtr&)> TargetCheckFunction;
+typedef std::function<StatePtr(const Perception&, const StatePtr&, SearchTarget)> Strategy;
+
+StatePtr BreadthFirstStrategy(const Perception&, const StatePtr&, SearchTarget);
+StatePtr LimitedDepthFirstStrategy(const Perception&, const StatePtr&, const SearchTarget);
+StatePtr AStarStrategy(const Perception&, const StatePtr&, SearchTarget);
+
+TargetCheckFunction GetCheckFunction(SearchTarget);
 
 class Agent {
   public:

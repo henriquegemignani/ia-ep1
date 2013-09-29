@@ -39,14 +39,15 @@ namespace {
         int f_value;
 
         bool operator<(const QueueItem& r) const {
-            return this->f_value < r.f_value;
+            // priority_queue picks the highest values first, so we must invert the order
+            return this->f_value > r.f_value;
         }
     };
 }
 
 StatePtr AStarStrategy(const Perception& perception, const StatePtr& initial_state, SearchTarget target) {
-    std::map<const State*, int> g_score;
-    auto g = [&g_score](const StatePtr& s) -> int& { return g_score[s.get()]; };
+    std::map<Position, int> g_score;
+    auto g = [&g_score](const StatePtr& s) -> int& { return g_score[s->agent_position_]; };
     std::function<int(const StatePtr&)> h;
     if (target == SearchTarget::GOLD)
         h = [&perception](const StatePtr& s) -> int { return gold_h_func(perception, s); };
@@ -58,8 +59,6 @@ StatePtr AStarStrategy(const Perception& perception, const StatePtr& initial_sta
     std::priority_queue<QueueItem> q;
     q.emplace(initial_state, g(initial_state) + h(initial_state));
 
-    std::set<Position> visited;
-
     while (!q.empty()) {
         QueueItem s = q.top();
 
@@ -67,7 +66,6 @@ StatePtr AStarStrategy(const Perception& perception, const StatePtr& initial_sta
             return result;
 
         q.pop();
-        visited.insert(s.state->agent_position_);
 
         // For every possible action
         for (Action a : action_list) {
@@ -76,10 +74,9 @@ StatePtr AStarStrategy(const Perception& perception, const StatePtr& initial_sta
                 continue;
             StatePtr new_state = s.state->ExecuteAction(a);
 
-            int tentative_g = g(s.state) + 1; // 1 == distance between s.state and new_state
+            int tentative_g = g(s.state) + 1;
 
-            // If we haven't visited this place, queue it.
-            if (is_in(visited, new_state->agent_position_) && tentative_g >= g(s.state))
+            if (is_in(g_score, new_state->agent_position_) && tentative_g >= g(new_state))
                 continue;
 
             g(new_state) = tentative_g;

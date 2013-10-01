@@ -11,7 +11,7 @@ namespace {
     }
 
     StatePtr ExitSearcher(const Perception& perception, const StatePtr& state) {
-        if (state->agent_position_ == Position(0, 0))
+        if (state->agent_position() == Position(0, 0))
             return state;
         return StatePtr();
     }

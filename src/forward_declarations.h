@@ -12,7 +12,7 @@ class MapMatrix;
 struct Perception;
 struct Position;
 
-struct State;
+class State;
 typedef std::shared_ptr<const State> StatePtr;
 
 

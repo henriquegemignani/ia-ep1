@@ -50,8 +50,12 @@ struct Perception {
     bool IsValidAction(Action, const State&) const;
 };
 
-struct State : public std::enable_shared_from_this<State> {
-    State() : next_action_(Action::DONE), size_(0), picked_gold_(new std::set<Position>) {}
+class State : public std::enable_shared_from_this<State> {
+public:
+    State(const std::set<Position>& gold_locations) 
+        : next_action_(Action::DONE)
+        , size_(0)
+        , available_gold_(new std::set<Position>(gold_locations)) {}
     ~State() = default;
 
     State(const State&) = default;
@@ -60,19 +64,26 @@ struct State : public std::enable_shared_from_this<State> {
     State(State&& r) throw()
         : previous_(std::move(r.previous_))
         , next_action_(r.next_action_)
-        , picked_gold_(std::move(r.picked_gold_))
+        , available_gold_(std::move(r.available_gold_))
         , agent_position_(r.agent_position_) {}
     State& operator=(State&&) = delete;
 
+    StatePtr ExecuteAction(Action) const;
+    std::list<Action> CreateActionList() const;
 
+    const StatePtr& previous() const { return previous_; }
+    Action next_action() const { return next_action_; }
+    int size() const { return size_; }
+    const std::shared_ptr<const std::set<Position>>& available_gold() const { return available_gold_; }
+    const Position& agent_position() const { return agent_position_; }
+
+  private:
     StatePtr previous_;
     Action next_action_;
     int size_;
-    std::shared_ptr<std::set<Position>> picked_gold_;
+    std::shared_ptr<const std::set<Position>> available_gold_;
     Position agent_position_;
 
-    StatePtr ExecuteAction(Action) const;
-    std::list<Action> CreateActionList() const;
 };
 
 class Environment {

@@ -24,7 +24,7 @@ StatePtr BreadthFirstStrategy(const Perception& perception, const StatePtr& init
         if (auto result = GetCheckFunction(target)(perception, s))
             return result;
 
-        visited.insert(s->agent_position_);
+        visited.insert(s->agent_position());
 
         // For every possible action
         for (Action a : action_list) {
@@ -34,7 +34,7 @@ StatePtr BreadthFirstStrategy(const Perception& perception, const StatePtr& init
             StatePtr new_state = s->ExecuteAction(a);
 
             // If we haven't visited this place, queue it.
-            if (is_in(visited, new_state->agent_position_))
+            if (is_in(visited, new_state->agent_position()))
                 continue;
 
             q.emplace(new_state);

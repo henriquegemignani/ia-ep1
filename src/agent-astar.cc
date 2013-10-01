@@ -17,16 +17,14 @@ namespace {
         return std::abs(l.x - r.x) + std::abs(l.y - r.y);
     }
 
-    int entrance_h_func(const Perception& perception, const StatePtr& state) {
-        return distance(state->agent_position_, Position(0, 0));
+    int entrance_h_func(const StatePtr& state) {
+        return distance(state->agent_position(), Position(0, 0));
     }
 
-    int gold_h_func(const Perception& perception, const StatePtr& state) {
+    int gold_h_func(const StatePtr& state) {
         int dist = std::numeric_limits<int>::max();
-        for (const Position& gold_pos : perception.gold_locations_) {
-            if (!is_in(*state->picked_gold_, gold_pos)) {
-                dist = std::min(dist, distance(gold_pos, state->agent_position_));
-            }
+        for (const Position& gold_pos : *state->available_gold()) {
+            dist = std::min(dist, distance(gold_pos, state->agent_position()));
         }
         return dist;
     }
@@ -47,12 +45,10 @@ namespace {
 
 StatePtr AStarStrategy(const Perception& perception, const StatePtr& initial_state, SearchTarget target) {
     std::map<Position, int> g_score;
-    auto g = [&g_score](const StatePtr& s) -> int& { return g_score[s->agent_position_]; };
-    std::function<int(const StatePtr&)> h;
-    if (target == SearchTarget::GOLD)
-        h = [&perception](const StatePtr& s) -> int { return gold_h_func(perception, s); };
-    else
-        h = [&perception](const StatePtr& s) -> int { return entrance_h_func(perception, s); };
+    auto g = [&g_score](const StatePtr& s) -> int& { return g_score[s->agent_position()]; };
+    auto h = (target == SearchTarget::GOLD)
+        ? gold_h_func
+        : entrance_h_func;
 
     g(initial_state) = 0;
 
@@ -76,7 +72,7 @@ StatePtr AStarStrategy(const Perception& perception, const StatePtr& initial_sta
 
             int tentative_g = g(s.state) + 1;
 
-            if (is_in(g_score, new_state->agent_position_) && tentative_g >= g(new_state))
+            if (is_in(g_score, new_state->agent_position()) && tentative_g >= g(new_state))
                 continue;
 
             g(new_state) = tentative_g;

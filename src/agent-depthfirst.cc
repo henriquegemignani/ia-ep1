@@ -29,7 +29,7 @@ private:
 StatePtr RecursiveLimitedDepthSearch(const Perception& perception, const StatePtr& s, SearchTarget target, VisitSet& visit, size_t max_depth) {
 
     // Mark that this position is visited, and when this function returns mark it's no longer visited.
-    InsertRemoveWrapper insert_pos(visit, s->agent_position_);
+    InsertRemoveWrapper insert_pos(visit, s->agent_position());
 
     if (visit.size() > max_depth)
         return StatePtr();
@@ -44,7 +44,7 @@ StatePtr RecursiveLimitedDepthSearch(const Perception& perception, const StatePt
             StatePtr new_state = s->ExecuteAction(a);
 
             // If we haven't visited this place, queue it.
-            if (visit.find(new_state->agent_position_) == visit.end()) {
+            if (visit.find(new_state->agent_position()) == visit.end()) {
                 StatePtr recursive = RecursiveLimitedDepthSearch(perception, new_state, target, visit, max_depth);
                 if (recursive)
                     return recursive;

@@ -6,8 +6,8 @@
 #include <cassert>
     
 int Perception::CalculateScore(const State& state) const {
-    int num_gold = static_cast<int>(state.picked_gold_->size());
-    int num_steps = state.size_ - num_gold;
+    int num_gold = static_cast<int>(gold_locations_.size() - state.available_gold()->size());
+    int num_steps = state.size() - num_gold;
     int score = num_gold * 4 * matrix_.size() - num_steps;
     return score;
 }
@@ -15,32 +15,32 @@ int Perception::CalculateScore(const State& state) const {
 bool Perception::IsValidAction(Action a, const State& state) const {
     switch (a) {
         case Action::MOVE_DOWN: {
-            Position next_pos(state.agent_position_.x,
-                              state.agent_position_.y + 1);
+            Position next_pos(state.agent_position().x,
+                              state.agent_position().y + 1);
             return matrix_.IsInside(next_pos) && !matrix_(next_pos);
         }
 
         case Action::MOVE_UP: {
-            Position next_pos(state.agent_position_.x,
-                              state.agent_position_.y - 1);
+            Position next_pos(state.agent_position().x,
+                              state.agent_position().y - 1);
             return matrix_.IsInside(next_pos) && !matrix_(next_pos);
         }
 
         case Action::MOVE_RIGHT: {
-            Position next_pos(state.agent_position_.x + 1,
-                              state.agent_position_.y);
+            Position next_pos(state.agent_position().x + 1,
+                              state.agent_position().y);
             return matrix_.IsInside(next_pos) && !matrix_(next_pos);
         }
 
         case Action::MOVE_LEFT: {
-            Position next_pos(state.agent_position_.x - 1,
-                              state.agent_position_.y);
+            Position next_pos(state.agent_position().x - 1,
+                              state.agent_position().y);
             return matrix_.IsInside(next_pos) && !matrix_(next_pos);
         }
 
         case Action::PICK_GOLD: {
-            return is_in(gold_locations_, state.agent_position_) &&
-                !is_in(*state.picked_gold_, state.agent_position_);
+            return is_in(gold_locations_, state.agent_position()) &&
+                   is_in(*state.available_gold(), state.agent_position());
         }
 
         default: {
@@ -58,10 +58,12 @@ std::shared_ptr<const State> State::ExecuteAction(Action a) const {
         case Action::MOVE_UP:    result->agent_position_.y -= 1; break;
         case Action::MOVE_RIGHT: result->agent_position_.x += 1; break;
         case Action::MOVE_LEFT:  result->agent_position_.x -= 1; break;
-        case Action::PICK_GOLD:
-            result->picked_gold_ = std::shared_ptr<std::set<Position>>(new std::set<Position>(*this->picked_gold_));
-            result->picked_gold_->insert(agent_position_);
+        case Action::PICK_GOLD: {
+            auto new_set = std::make_shared<std::set<Position>>(*this->available_gold_);
+            new_set->erase(agent_position_);
+            result->available_gold_ = new_set;
             break;
+        }
         default: assert(false);
     }
     result->next_action_ = a;
@@ -71,10 +73,10 @@ std::shared_ptr<const State> State::ExecuteAction(Action a) const {
     
 namespace {
 void to_action_list(const State& state, std::list<Action>& result) {
-    if (state.previous_)
-        to_action_list(*state.previous_, result);
-    if (state.next_action_ != Action::DONE)
-        result.push_back(state.next_action_);
+    if (state.previous())
+        to_action_list(*state.previous(), result);
+    if (state.next_action() != Action::DONE)
+        result.push_back(state.next_action());
 }
 }
 
@@ -84,11 +86,12 @@ std::list<Action> State::CreateActionList() const {
     return result;
 }
 
-Environment::Environment() : current_state_(new State) {}
+Environment::Environment() {}
 
 Environment::~Environment() {}
 
 Environment::Results Environment::Run() {
+    current_state_ = std::make_shared<State>(data_.gold_locations_);
     while (true) {
         Action a = agent_->CalculateNextAction(data_, current_state_);
         if (a == Action::DONE)

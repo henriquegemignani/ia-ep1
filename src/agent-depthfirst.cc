@@ -57,7 +57,7 @@ StatePtr RecursiveLimitedDepthSearch(const Perception& perception, const StatePt
 }
 
 StatePtr LimitedDepthFirstStrategy(const Perception& perception, const StatePtr& initial_state, SearchTarget target) {
-    for (size_t max_depth = 1; max_depth < perception.matrix_.size() * perception.matrix_.size(); ++max_depth) {
+    for (size_t max_depth = 1; max_depth < static_cast<size_t>(perception.matrix_.size() * perception.matrix_.size()); ++max_depth) {
         VisitSet visit;
         StatePtr search = RecursiveLimitedDepthSearch(perception, initial_state, target, visit, max_depth);
         if (search)
